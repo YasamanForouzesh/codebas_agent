@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Codebase Agent Chat</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        #messages { height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 6px; }
+        .user { text-align: right; margin: 8px 0; }
+        .assistant { text-align: left; margin: 8px 0; }
+        .bubble { display: inline-block; padding: 8px 12px; border-radius: 12px; max-width: 80%; }
+        .user .bubble { background: #0084ff; color: white; }
+        .assistant .bubble { background: #f0f0f0; }
+        #input-row { display: flex; gap: 8px; }
+        input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px; }
+        button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; }
+        #send { background: #0084ff; color: white; }
+        #reset { background: #ff4444; color: white; }
+    </style>
+</head>
+<body>
+    <h2>Codebase Agent</h2>
+    <div id="messages"></div>
+    <div id="input-row">
+        <input id="input" type="text" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()" />
+        <button id="send" onclick="sendMessage()">Send</button>
+        <button id="reset" onclick="resetSession()">Reset</button>
+    </div>
+    <script>
+        const sessionId = "test-session";
+
+        function addMessage(text, role) {
+            const div = document.getElementById("messages");
+            div.innerHTML += `<div class="${role}"><span class="bubble">${text}</span></div>`;
+            div.scrollTop = div.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById("input");
+            const message = input.value.trim();
+            if (!message) return;
+            input.value = "";
+            addMessage(message, "user");
+            const res = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ session_id: sessionId, message })
+            });
+            const data = await res.json();
+            addMessage(data.reply, "assistant");
+        }
+
+        async function resetSession() {
+            await fetch(`/reset?session_id=${sessionId}`, { method: "POST" });
+            document.getElementById("messages").innerHTML = "";
+        }
+    </script>
+</body>
+</html>
