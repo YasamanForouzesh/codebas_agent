@@ -59,7 +59,9 @@ sessions: dict[str, list] = {}
 
 def chat(session_id: str, message: str) -> str:
     print(f"Session {session_id} sent message: {message}"  )
-    history = sessions.get(session_id, [{"role": "system", "content": SYSTEM_PROMPT}])
+    if session_id not in sessions:
+        sessions[session_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    history = sessions[session_id]
     print(history)
     history.append({"role": "user", "content": message})
 
