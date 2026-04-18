@@ -9,7 +9,12 @@
         .assistant { text-align: left; margin: 8px 0; }
         .bubble { display: inline-block; padding: 8px 12px; border-radius: 12px; max-width: 80%; }
         .user .bubble { background: #0084ff; color: white; }
-        .assistant .bubble { background: #f0f0f0; }
+        .assistant .bubble { background: #f0f0f0; display: block; max-width: 90%; }
+        .assistant .bubble p { margin: 4px 0; }
+        .assistant .bubble p:first-child { margin-top: 0; }
+        .assistant .bubble p:last-child { margin-bottom: 0; }
+        .assistant .bubble ul, .assistant .bubble ol { margin: 4px 0; padding-left: 20px; }
+        .assistant .bubble li { margin: 2px 0; }
         #input-row { display: flex; gap: 8px; }
         input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px; }
         button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; }
@@ -30,7 +35,10 @@
 
         function addMessage(text, role) {
             const div = document.getElementById("messages");
-            div.innerHTML += `<div class="${role}"><span class="bubble">${text}</span></div>`;
+            const content = role === "assistant"
+                ? (typeof marked !== "undefined" ? marked.parse(text) : text.replace(/\n/g, "<br>"))
+                : text;
+            div.innerHTML += `<div class="${role}"><span class="bubble">${content}</span></div>`;
             div.scrollTop = div.scrollHeight;
         }
 
@@ -54,5 +62,6 @@
             document.getElementById("messages").innerHTML = "";
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </body>
 </html>
