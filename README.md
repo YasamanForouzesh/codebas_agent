@@ -88,7 +88,7 @@ user message
 
 ### Project Discovery
 
-Known projects are loaded from `config/project_definitions.json` and injected into the system prompt. The agent picks `project_id` and `source` directly from context without a tool call. If the project isn't in the list, it calls `list_projects`.
+Known projects are loaded from `config/project_definitions.json` at startup. For ambiguous queries the agent calls `lookup_project`, which scores projects by name, description, and keyword overlap. If the project isn't in the list at all, it falls back to `list_projects`.
 
 For ambiguous queries, `lookup_project` scores projects by name, description, and keyword overlap using token normalization (handles camelCase, snake_case, kebab-case).
 
@@ -112,7 +112,7 @@ The LLM passes `source` to every tool call to route to the correct instance.
 
 ### Conversation History
 
-History is stored in-memory per session. The system prompt (including the known project list) is injected once at session start.
+History is stored in-memory per session. The system prompt is injected once at session start.
 
 ---
 
@@ -127,7 +127,7 @@ History is stored in-memory per session. The system prompt (including the known 
 | `read_file` | Read a file from a repository |
 | `list_repository_tree` | List files and directories in a repo |
 | `list_merge_requests` | List open MRs for a project |
-| `list_merge_request_by_name` | Search MRs by title |
+| `search_merge_requests` | Search MRs by title |
 | `get_merge_request` | Fetch an MR with full diffs |
 
 ---
