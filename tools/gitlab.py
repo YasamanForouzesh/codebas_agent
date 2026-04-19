@@ -210,15 +210,15 @@ TOOL_DEFINITIONS = [
     {
         "type": "function",
         "function": {
-            "name": "list_merge_request_by_name",
+            "name": "search_merge_requests",
             "description": "Search for merge requests by title across all accessible projects.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "merge_request_name": {"type": "string", "description": "Title or partial title to search for"},
+                    "query": {"type": "string", "description": "Title or partial title to search for"},
                     **_SOURCE_PARAM,
                 },
-                "required": ["merge_request_name", "source"],
+                "required": ["query", "source"],
             },
         },
     },
@@ -263,6 +263,7 @@ TOOL_DEFINITIONS = [
                 "properties": {
                     "project_id": {"type": "integer", "description": "Numeric GitLab project ID"},
                     "search_term": {"type": "string", "description": "Term to filter search results"},
+                    "ref": {"type": "string", "description": "Branch, tag, or commit to search in. Optional; defaults to the project's default branch."},
                     "question_type": {"type": "string", "enum": ["usage", "ui_usage", "endpoint_definition"], "description": "Type of question — affects result ranking. Use 'ui_usage' for UI/frontend questions, 'endpoint_definition' for backend endpoint questions, 'usage' otherwise."},
                     **_SOURCE_PARAM,
                 },
@@ -327,8 +328,8 @@ def handle_list_projects(input: dict) -> list:
     return [{"id": p.id, "name": p.name, "url": p.web_url, "description": p.description} for p in projects]
 
 
-def handle_list_merge_request_by_name(input: dict) -> list:
-    mrs = _gl(input).mergerequests.list(search=input["merge_request_name"], iterator=True)
+def handle_search_merge_requests(input: dict) -> list:
+    mrs = _gl(input).mergerequests.list(search=input["query"], iterator=True)
     return [{"iid": mr.iid, "title": mr.title, "project_id": mr.project_id} for mr in mrs]
 
 
@@ -352,21 +353,26 @@ def handle_get_merge_request(input: dict) -> dict:
 
 def handle_search_code(input: dict) -> list:
     project = _gl(input).projects.get(input["project_id"])
-    results = project.search(scope="blobs", search=input["search_term"])
+    search_kwargs = {"scope": "blobs", "search": input["search_term"]}
+    if input.get("ref"):
+        search_kwargs["ref"] = input["ref"]
+    results = project.search(**search_kwargs)
     matches = [{"filename": r["filename"], "ref": r["ref"], "data": r["data"], "repo_name": project.name} for r in results]
     question_type = input.get("question_type", "usage")
     ranked = rank_matches(matches, query=input["search_term"], question_type=question_type)
     return ranked[:10]
 
+
 def handle_read_file(input: dict) -> str:
     project = _gl(input).projects.get(input["project_id"])
-
     kwargs = {"file_path": input["file_path"]}
     if input.get("ref"):
         kwargs["ref"] = input["ref"]
-
     raw_content = project.files.raw(**kwargs)
-    return raw_content.decode("utf-8")
+    try:
+        return raw_content.decode("utf-8")
+    except UnicodeDecodeError:
+        return f"[binary or non-UTF-8 file: {input['file_path']}]"
 
 def list_repository_tree(input: dict) -> list:
     project = _gl(input).projects.get(input["project_id"])
@@ -408,7 +414,7 @@ TOOL_HANDLERS = {
     "lookup_project": handle_lookup_project,
     "get_project": handle_get_project,
     "list_projects": handle_list_projects,
-    "list_merge_request_by_name": handle_list_merge_request_by_name,
+    "search_merge_requests": handle_search_merge_requests,
     "list_merge_requests": handle_list_merge_requests,
     "list_repository_tree": list_repository_tree,
     "get_merge_request": handle_get_merge_request,

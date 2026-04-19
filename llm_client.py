@@ -4,7 +4,7 @@ import os
 import httpx
 from openai import OpenAI
 
-from tools.gitlab import TOOL_DEFINITIONS, TOOL_HANDLERS, load_project_definitions
+from tools.gitlab import TOOL_DEFINITIONS, TOOL_HANDLERS
 
 
 # runs once at startup
@@ -19,12 +19,7 @@ def _connect() -> tuple[OpenAI, str]:
 
 # module-level — created once when FastAPI starts
 client, model = _connect()
-_PROJECT_DEFINITIONS = load_project_definitions()
 
-_projects_json = json.dumps(
-    [{"project_id": p["project_id"], "name": p["name"], "source": p["source"], "description": p["description"], "keywords": p.get("keywords", [])} for p in _PROJECT_DEFINITIONS],
-    indent=2
-)
 
 SYSTEM_PROMPT = f"""You are a full-stack codebase investigation assistant helping a backend engineer understand how code is used across repositories.
 

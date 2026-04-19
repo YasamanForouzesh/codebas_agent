@@ -8,4 +8,4 @@ wheels/
 .env
 # Virtual environments
 .venv
-.config/project_definitions.json
+config/project_definitions.json

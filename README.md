@@ -1,6 +1,6 @@
 # 🤖 Codebase Agent
 
-An AI-powered codebase agent that supports multiple LLM providers with automatic fallback, served as a FastAPI web API.
+An AI-powered codebase investigation agent that searches GitLab repositories to answer questions about code usage, API endpoints, and cross-repo connections. Supports multiple LLM providers with automatic fallback.
 
 ---
 
@@ -8,13 +8,17 @@ An AI-powered codebase agent that supports multiple LLM providers with automatic
 
 ```
 codebase-agent/
-├── main.py              # FastAPI app — routes and entry point
-├── llm_client.py        # LLM client with Ollama → OpenAI fallback and session history
-├── gitlab_client.py     # GitLab API client
-├── templates/
-│   └── index.html       # Chat UI for testing endpoints
-├── pyproject.toml       # Project dependencies
-└── .env                 # Environment variables (not committed)
+├── main.py                          # Entry point — Gradio UI
+├── llm_client.py                    # LLM client, session history, system prompt
+├── gitlab_client.py                 # Standalone GitLab client (proxy)
+├── git.py                           # GitLab client wrapper
+├── tools/
+│   └── gitlab.py                    # GitLab tool definitions, handlers, scoring
+├── config/
+│   ├── project_definitions.json     # Known projects with IDs, descriptions, keywords
+│   └── project_definition_example.json
+├── pyproject.toml                   # Project dependencies
+└── .env                             # Environment variables (not committed)
 ```
 
 ---
@@ -38,13 +42,24 @@ uv sync
 Create a `.env` file in the project root:
 
 ```env
-# Ollama (optional — falls back to OpenAI if not running)
+# LLM — Ollama (optional, falls back to OpenAI if not running)
 OLLAMA_URL=http://localhost:11434
-OLLAMA_MODEL_NAME=llama3
+OLLAMA_MODEL=llama3
 
-# OpenAI (used as fallback if Ollama is not running)
+# LLM — OpenAI fallback
 OPENAI_API_KEY=your_openai_api_key
 OPENAI_MODEL_NAME=gpt-4o-mini
+
+# GitLab — proxy (BE/FE)
+GITLAB_PROXY_URL=https://your-gitlab.com
+GITLAB_PROXY_TOKEN=your_proxy_token
+
+# GitLab — client side
+GITLAB_CLIENT_URL=https://your-client-gitlab.com
+GITLAB_CLIENT_TOKEN=your_client_token
+
+# Project definitions
+PROJECT_DEFINITIONS_FILE=config/project_definitions.json
 ```
 
 ---
@@ -53,65 +68,67 @@ OPENAI_MODEL_NAME=gpt-4o-mini
 
 ### LLM Client with Automatic Fallback
 
-`llm_client.py` uses the OpenAI client for both providers — Ollama exposes an OpenAI-compatible API via `base_url`.
+On startup `llm_client.py` pings Ollama. If running, it uses Ollama. If not, falls back to OpenAI automatically. Both use the `openai` package — Ollama exposes an OpenAI-compatible API via `base_url`.
 
-On startup it pings Ollama. If running, it uses Ollama. If not, it falls back to OpenAI automatically:
-
-```python
-# runs once at module import (FastAPI startup)
-client, model = _connect()
+```
+startup → ping Ollama → running? use Ollama : use OpenAI
 ```
 
-No separate packages needed for Ollama — just the `openai` package pointed at a different URL.
+### Agent Tool Loop
+
+The agent runs in a loop — it calls tools until it has enough evidence to answer:
+
+```
+user message
+    → LLM decides which tool to call
+    → tool executes, result appended to history
+    → LLM calls more tools or answers
+    → reply returned
+```
+
+### Project Discovery
+
+Known projects are loaded from `config/project_definitions.json` and injected into the system prompt. The agent picks `project_id` and `source` directly from context without a tool call. If the project isn't in the list, it calls `list_projects`.
+
+For ambiguous queries, `lookup_project` scores projects by name, description, and keyword overlap using token normalization (handles camelCase, snake_case, kebab-case).
+
+### Search Result Ranking
+
+`search_code` results are automatically ranked by `score_match` before being returned to the LLM:
+
+- **+60** exact query match in snippet
+- **+15** source file type (`.ts`, `.go`, `.py`, etc.)
+- **+15** real code usage patterns (`useQuery`, `api.`, `fetch(`)
+- **-15** noisy paths (`test`, `spec`, `mock`, `dist`)
+- Boosted by `question_type`: `ui_usage` boosts frontend files, `endpoint_definition` boosts backend files
+
+### Two GitLab Instances
+
+The agent supports two GitLab sources configured separately:
+- `proxy` — BE/FE repositories
+- `client` — client-side repositories
+
+The LLM passes `source` to every tool call to route to the correct instance.
 
 ### Conversation History
 
-History is stored in-memory per session using a `session_id` as the key:
-
-```python
-sessions: dict[str, list] = {}
-```
-
-Each `chat()` call loads the history, appends the new message, sends the full context to the LLM, and saves it back. This gives the LLM memory of the full conversation.
-
-### FastAPI Lifecycle
-
-Module-level code in `llm_client.py` runs once when FastAPI imports the file at startup:
-- `_connect()` — pings Ollama, picks provider
-- `client, model` — created once, reused for every request
-- `sessions` — in-memory store, lives for the lifetime of the server
+History is stored in-memory per session. The system prompt (including the known project list) is injected once at session start.
 
 ---
 
-## 🌐 API Endpoints
+## 🛠️ Available Tools
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET`  | `/` | Chat UI (browser) |
-| `POST` | `/chat` | Send a message |
-| `POST` | `/reset` | Clear session history |
-
-### POST /chat
-
-```json
-{
-    "session_id": "user-123",
-    "message": "Hello!"
-}
-```
-
-Response:
-```json
-{
-    "reply": "Hi! How can I help you?"
-}
-```
-
-### POST /reset
-
-```
-/reset?session_id=user-123
-```
+| Tool | Description |
+|------|-------------|
+| `lookup_project` | Score and rank projects by query — use when project is ambiguous |
+| `get_project` | Fetch a project by numeric ID |
+| `list_projects` | List all accessible projects, optionally filtered by group |
+| `search_code` | Search code in a project — results auto-ranked by relevance |
+| `read_file` | Read a file from a repository |
+| `list_repository_tree` | List files and directories in a repo |
+| `list_merge_requests` | List open MRs for a project |
+| `list_merge_request_by_name` | Search MRs by title |
+| `get_merge_request` | Fetch an MR with full diffs |
 
 ---
 
@@ -119,9 +136,9 @@ Response:
 
 | Package         | Purpose                                      |
 |-----------------|----------------------------------------------|
-| `fastapi`       | Web framework                                |
-| `uvicorn`       | ASGI server to run FastAPI                   |
+| `gradio`        | Chat UI                                      |
 | `openai`        | LLM client (used for both OpenAI and Ollama) |
+| `python-gitlab` | GitLab API client                            |
 | `python-dotenv` | Load environment variables                   |
 | `httpx`         | HTTP client for Ollama health check          |
 
@@ -130,7 +147,7 @@ Response:
 ## 🚀 Run
 
 ```bash
-uv run uvicorn main:app --reload
+uv run python main.py
 ```
 
-Then open `http://localhost:8000` for the chat UI or `http://localhost:8000/docs` for the interactive API docs.
+Then open `http://localhost:7860` in your browser.
