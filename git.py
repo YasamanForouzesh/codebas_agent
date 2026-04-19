@@ -24,9 +24,9 @@ class GitlabClientWrapper:
         project = self.get_project(project_id)
         return project.mergerequests.list(state="opened", iterator=True)
 
-    def list_merge_request_by_name(self, merge_rquest_name: str):
+    def list_merge_request_by_name(self, merge_request_name: str):
         """Search for merge requests by title across all accessible projects."""
-        return self.client.mergerequests.list(search=merge_rquest_name, iterator=True)
+        return self.client.mergerequests.list(search=merge_request_name, iterator=True)
 
     def get_merge_request(self, project_id: int, merge_request_id: int):
         """Fetch a single merge request and its code diffs by project ID and MR IID."""

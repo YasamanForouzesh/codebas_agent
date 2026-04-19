@@ -1,32 +1,47 @@
 from dotenv import load_dotenv
 load_dotenv()  # must be first before any other imports that use env vars
 
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
+import gradio as gr
 from llm_client import chat, reset
 
+SESSION_ID = "gradio-session"
 
-app = FastAPI()
+def respond(message, history):
+    reply = chat(SESSION_ID, message)
+    return reply
+
+def clear():
+    reset(SESSION_ID)
+
+app = gr.ChatInterface(
+    fn=respond,
+    title="Codebase Agent",
+)
+
+if __name__ == "__main__":
+    app.launch()
 
 
-@app.get("/", response_class=HTMLResponse)
-def index():
-    return open("templates/index.html").read()
+# def main():
 
-class ChatRequest(BaseModel):
-    session_id: str
-    message: str
+#     project_id = handle_list_projects({"source": "proxy", "group_name": "backend"})
+#     id = 0
+#     for p in project_id:
+#         print(p)
+#         # if p["name"] == "crm-api":
+#         #     id = p["id"]
+#         #     break   
+    
+#     # print(id)
+#     # search = handle_search_code({
+#     #     "project_id": id,
+#     #     "search_term": "getpersons",
+#     #     "source": "proxy",
+#     # })
+
+#     print(search)
 
 
-@app.post("/chat")
-def chat_endpoint(request: ChatRequest):
-    reply = chat(request.session_id, request.message)
-    return {"reply": reply}
 
-
-@app.post("/reset")
-def reset_endpoint(session_id: str):
-    reset(session_id)
-    return {"status": "session cleared"}
-
+# if __name__ == "__main__":
+#     main()

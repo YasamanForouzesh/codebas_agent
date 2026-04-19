@@ -1,0 +1,192 @@
+[
+  {
+    "source": "proxy",
+    "project_id": 0,
+    "name": "provision-api",
+    "url": "https://gitlab.example.com/backend/provision-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for provisioning-related workflows and configuration setup. Likely owns endpoints for account provisioning, service setup, and provisioning state changes.",
+    "keywords": ["provision", "provisioning", "setup", "configuration", "service"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 120,
+    "name": "notification-api",
+    "url": "https://gitlab.example.com/backend/notification-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for browser, email, and SMS notifications. Owns endpoints related to notification delivery, notification preferences, and notification-triggering workflows.",
+    "keywords": ["notification", "email", "sms", "mms", "browser", "alert", "message"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 118,
+    "name": "upload-api",
+    "url": "https://gitlab.example.com/backend/upload-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for file upload workflows, especially uploading files to cloud storage. Owns endpoints for upload requests, file transfer initiation, and storage-related upload operations.",
+    "keywords": ["upload", "file", "storage", "media", "attachment"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 117,
+    "name": "lead-ingestion-api",
+    "url": "https://gitlab.example.com/ingestions/lead-ingestion-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for HTTP lead ingestion. Owns endpoints that receive, validate, and ingest incoming lead data from external systems or integrations.",
+    "keywords": ["lead", "ingestion", "ingest", "webhook", "import"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 99,
+    "name": "recents-api",
+    "url": "https://gitlab.example.com/backend/recents-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for recent activity data related to users and accounts. Owns endpoints for recent events, activity feeds, and recently accessed or changed entities.",
+    "keywords": ["recent", "activity", "feed", "history", "timeline"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 86,
+    "name": "call-history-api",
+    "url": "https://gitlab.example.com/backend/call-history-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for customer call history, call notes, call tags, and tag categories. Owns endpoints for retrieving call records and managing call metadata.",
+    "keywords": ["call history", "call", "history", "notes", "tags", "recordings"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 124,
+    "name": "products-api",
+    "url": "https://gitlab.example.com/backend/products-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for customer products. Owns endpoints related to product data, product availability, product configuration, and customer-product relationships and invoices.",
+    "keywords": ["product", "products", "plan", "subscription", "catalog", "invoice", "orders", "qotes"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 138,
+    "name": "pbx-config-api",
+    "url": "https://gitlab.example.com/backend/pbx-config-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for PBX and VoIP configuration. Owns endpoints for phone system settings, PBX configuration data, and telephony-related configuration management.",
+    "keywords": ["pbx", "voip", "phone", "telephony", "config", "sip"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 129,
+    "name": "custom-fields-api",
+    "url": "https://gitlab.example.com/backend/custom-fields-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for custom fields used in the UI. Owns endpoints for defining, retrieving, and managing dynamic or user-configurable fields across the product.",
+    "keywords": ["custom field", "custom fields", "field", "schema", "dynamic field"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 152,
+    "name": "crm-api",
+    "url": "https://gitlab.example.com/backend/crm-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for CRM entities such as leads, contacts(persons), opportunities, pipelines, and account relationship data.",
+    "keywords": ["crm", "lead", "leads", "contact", "contacts", "opportunity", "pipeline", "person"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 151,
+    "name": "call-api",
+    "url": "https://gitlab.example.com/backend/call-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for initiating VoIP-related actions over HTTP. Owns endpoints that trigger calls or telephony events rather than historical call records.",
+    "keywords": ["call", "dial", "voip", "telephony", "initiate call"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 149,
+    "name": "text-api",
+    "url": "https://gitlab.example.com/backend/text-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for SMS and MMS messaging. Owns endpoints for sending text messages, media messages, and messaging-related workflows.",
+    "keywords": ["text", "sms", "mms", "message", "messaging"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 148,
+    "name": "favorites-api",
+    "url": "https://gitlab.example.com/backend/favorites-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for user favorites. Owns endpoints for storing, retrieving, and managing favorited entities or user-pinned items.",
+    "keywords": ["favorite", "favorites", "pinned", "bookmark", "starred"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 157,
+    "name": "user-api",
+    "url": "https://gitlab.example.com/backend/user-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for user data, user profiles, account-level user information, and user-related operations.",
+    "keywords": ["user", "users", "profile", "profiles"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 170,
+    "name": "workflows-api",
+    "url": "https://gitlab.example.com/backend/workflows-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for workflow-related backend logic. Owns endpoints for workflow execution, workflow configuration, and workflow-driven automation behavior.",
+    "keywords": ["workflow", "workflows", "execution", "automation flow"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 183,
+    "name": "calendar-api",
+    "url": "https://gitlab.example.com/backend/calendar-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for calendar integrations and calendar OAuth flows. Owns endpoints for calendar auth, integration setup, and calendar-connected workflows.",
+    "keywords": ["calendar", "oauth", "integration", "schedule"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 206,
+    "name": "automation-api",
+    "url": "https://gitlab.example.com/backend/automation-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Backend API for automation-related features and execution. Likely owns endpoints for automation definitions, triggers, rules, and automation state management.",
+    "keywords": ["automation", "rule", "trigger", "job", "task"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 219,
+    "name": "notification-worker",
+    "url": "https://gitlab.example.com/backend/notification-worker",
+    "kind": "worker",
+    "defines_endpoints": false,
+    "description": "Background worker for notification processing and delivery. Does not define primary backend endpoints.",
+    "keywords": ["notification", "worker", "delivery"]
+  },
+  {
+    "source": "proxy",
+    "project_id": 240,
+    "name": "products-worker",
+    "url": "https://gitlab.example.com/backend/products-worker",
+    "kind": "worker",
+    "defines_endpoints": false,
+    "description": "Background worker for product-related processing. Does not define primary backend endpoints.",
+    "keywords": ["product", "worker", "async", "job"]
+  }
+]

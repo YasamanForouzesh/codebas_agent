@@ -1,0 +1,12 @@
+[
+  {
+    "source": "proxy",
+    "project_id": 123,
+    "name": "example-api",
+    "url": "https://gitlab.example.com/group/example-api",
+    "kind": "backend_api",
+    "defines_endpoints": true,
+    "description": "Example backend API",
+    "keywords": ["example"]
+  }
+]
